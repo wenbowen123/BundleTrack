@@ -1,0 +1,4 @@
+*.npy
+__pycache__
+.vscode
+.idea

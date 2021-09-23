@@ -1,0 +1,10 @@
+*.npy
+*.pyc
+*~
+.ipynb_checkpoints/
+dump_feats/
+logs/
+release/
+outputs
+sacre_coeur.tar.gz
+pretrained.tar.gz

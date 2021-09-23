@@ -1,0 +1,31 @@
+make sure obj mtl writing works
+
+Update triMeshAcceleratorBVH to parameterize parallel build and possibly support parelll build for midpoint.
+OBB2f
+parameterize ml::shapes
+
+Intersections/Collision: 
+mesh - mesh; ideal std::vector<std::pair<triMesh*, mat4f>> - std::vector<std::pair<triMesh*, mat4f>>
+BVH: Triangle -> Primitive (to support Vertices)
+Mesh - Ray
+Mesh - Line
+Mesh - OBB (get NR eigenvalue computation into matrix3x3)
+
+OnMeshLoad: reduces to lower res mesh for collisison (maybe in quadedge)`
+
+D3D11: Culling + Shading
+Shapes: Cylinder, Torus, Sphere
+
+
+Code audit:
+
+core-base
+ * common.h -> 
+ * console.h -> now multiStream.h
+ * baseImage ->
+   some core functions seem to be missing, like getSubregion
+   some functions  don't do what they sound like, like copyIntoImage should actually be named copyFromImage
+   I think some functions assume floats and are broken on r8g8b8 images
+   MImage is fine to keep if it's useful, but feels like we can just handle all this with stream serialization?
+ * baseImageHelper ->
+   Some functions here should be moved to a colorUtil namespace

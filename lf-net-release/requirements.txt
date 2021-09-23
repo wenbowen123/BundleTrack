@@ -1,0 +1,10 @@
+imageio==2.1.2
+numpy==1.14.5
+opencv-contrib-python==3.4.0.12
+opencv-python==3.4.0.12
+pandas==0.20.1
+scipy==1.0.0
+six==1.11.0
+tensorflow-gpu==1.4.0
+tqdm==4.11.2
+h5py

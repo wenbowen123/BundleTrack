@@ -1,0 +1,66 @@
+data_dir: /media/bowen/e25c9489-2f57-42dd-b076-021c59369fec/catkin_ws/src/iros20_dataset/video_rosbag/IROS_SELECTED/FINISHED_LABEL.iros_submission_version/bleach0
+mask_dir: '/media/bowen/e25c9489-2f57-42dd-b076-021c59369fec/catkin_ws/src/iros20_dataset/video_rosbag/IROS_SELECTED/FINISHED_LABEL.iros_submission_version/bleach0/masks'
+model_name: 021_bleach_cleanser
+model_dir: /media/bowen/e25c9489-2f57-42dd-b076-021c59369fec/DATASET/YCB_Video_Dataset/CADmodels/021_bleach_cleanser/textured_simple.obj
+debug_dir: /tmp/BundleTrack/
+LOG: 0
+port: '5555'
+
+depth_processing:
+  erode:
+    radius: 1
+    diff: 0.001
+    ratio: 0.8   #if ratio larger than this, depth set to 0
+  bilateral_filter:
+    radius: 2
+    sigma_D: 2
+    sigma_R: 100000
+  outlier_removal:
+    num: 30
+    std_mul: 3
+
+
+bundle:
+  num_iter_outter: 7
+  num_iter_inner: 5
+  window_size: 2  #exclude keyframes, include new frame
+  max_BA_frames: 15
+  subset_selection_method: greedy_rot
+  robust_delta: 0.005
+  min_fm_edges_newframe: 5
+  image_downscale: 4
+
+keyframe:
+  min_interval: 1
+  min_feat_num: 0
+  min_rot: 10
+
+
+sift:
+  scales: [2,4,8]
+  nOctaveLayers: 3
+  contrastThreshold: 0.01
+  edgeThreshold: 50
+  sigma: 1.6
+
+feature_corres:
+  mutual: True
+  max_dist_no_neighbor: 0.02
+  max_normal_no_neighbor: 45
+  max_dist_neighbor: 0.03
+  max_normal_neighbor: 45
+
+ransac:
+  max_iter: 2000
+  num_sample: 3
+  inlier_dist: 0.01
+  inlier_normal_angle: 45
+  max_trans_neighbor: 0.05   #ransac model estimated pose shouldnt be too far
+  max_rot_deg_neighbor: 45
+  max_trans_no_neighbor: 0.02
+  max_rot_no_neighbor: 10
+
+p2p:
+  max_dist: 0.02
+  max_normal_angle: 45
+
