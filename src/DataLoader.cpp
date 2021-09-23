@@ -70,8 +70,6 @@ DataLoaderNOCS::DataLoaderNOCS(std::shared_ptr<YAML::Node> yml1) : DataLoaderBas
     boost::replace_all(_model_dir, std::string(what[0]), "NOCS/obj_models/real_test/"+_model_name+".obj");
     _gt_dir = data_dir;
     boost::replace_all(_gt_dir, std::string(what[0]), "NOCS/gts/real_test_text/scene_" + std::to_string(_scene_id) + "/model_" + _model_name + "/");
-    _scale_dir = data_dir;
-    boost::replace_all(_scale_dir, std::string(what[0]), "NOCS/NOCS-REAL275-additional/model_scales/"+_model_name+".txt");
   }
 
   _K<<591.0125, 0, 322.525,
@@ -145,17 +143,6 @@ DataLoaderNOCS::DataLoaderNOCS(std::shared_ptr<YAML::Node> yml1) : DataLoaderBas
     }
 
   }
-
-
-  Eigen::Matrix<float,8,3> vertices;
-  Utils::parseMatrixTxt<8,3>(_scale_dir,vertices);
-  vertices /= 1000.0;
-  float xmin = vertices.col(0).minCoeff();
-  float xmax = vertices.col(0).maxCoeff();
-  float ymin = vertices.col(1).minCoeff();
-  float ymax = vertices.col(1).maxCoeff();
-  float zmin = vertices.col(2).minCoeff();
-  float zmax = vertices.col(2).maxCoeff();
 
 }
 

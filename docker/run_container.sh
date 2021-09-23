@@ -1,6 +1,6 @@
-BUNDLETRACK_DIR="/media/bowen/e25c9489-2f57-42dd-b076-021c59369fec/github/BundleTrack_release"
+BUNDLETRACK_DIR="/home/bowen/debug/BundleTrack"
 NOCS_DIR="/media/bowen/e25c9489-2f57-42dd-b076-021c59369fec/DATASET/NOCS"
-YCBINEOAT_DIR="/media/bowen/e25c9489-2f57-42dd-b076-021c59369fec/catkin_ws/src/iros20_dataset/video_rosbag/IROS_SELECTED/FINISHED_LABEL.iros_submission_version"
+YCBINEOAT_DIR="/iros_submission_version"
 echo "BUNDLETRACK_DIR $BUNDLETRACK_DIR"
 echo "NOCS_DIR $NOCS_DIR"
 echo "YCBINEOAT_DIR $YCBINEOAT_DIR"

@@ -68,7 +68,6 @@ class DataLoaderNOCS : public DataLoaderBase
 {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-  std::string _scale_dir;
 
 public:
   DataLoaderNOCS(std::shared_ptr<YAML::Node> yml1);

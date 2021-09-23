@@ -11,6 +11,7 @@
     "*.dae": "xml",
     "*.pyx": "python",
     "*.pxd": "cpp",
+    "*.srdf": "xml",
     "*.sdf": "xml",
     "array": "cpp",
     "bitset": "cpp",
@@ -92,6 +93,13 @@
     "variant": "cpp",
     "mixinvector": "cpp",
     "fast_back_stack": "cpp",
-    "nonlinearoptimization": "cpp"
+    "nonlinearoptimization": "cpp",
+    "hash_map": "cpp",
+    "slist": "cpp",
+    "valarray": "cpp",
+    "bufferobject": "cpp",
+    "image": "cpp",
+    "texture": "cpp",
+    "buffered_value": "cpp"
   }
 }

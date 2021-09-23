@@ -376,49 +376,37 @@ void Bundler::saveNewframeResult()
   ff<<std::setprecision(10)<<ob_in_cam<<std::endl;
   ff.close();
 
-  PointCloudRGBNormal::Ptr cloud_world(new PointCloudRGBNormal);
-  pcl::copyPointCloud(*_newframe->_cloud,*cloud_world);
-  Utils::passFilterPointCloud(cloud_world,cloud_world,"z",0.1,2.0);
-  pcl::io::savePLYFile(out_dir+"cloud_in_cam.ply",*cloud_world);
-  pcl::transformPointCloudWithNormals(*cloud_world,*cloud_world,cur_in_model);
-  pcl::io::savePLYFile(out_dir+"cloud_world.ply",*cloud_world);
-  pcl::transformPointCloudWithNormals(*_newframe->_cloud_down,*cloud_world,cur_in_model);
-  pcl::io::savePLYFile(out_dir+"cloud_world_downsample.ply",*cloud_world);
-  PointCloudRGBNormal::Ptr cloud_raw_depth(new PointCloudRGBNormal);
-  Utils::convert3dOrganizedRGB(_newframe->_depth_raw, _newframe->_color, _newframe->_K, cloud_raw_depth);
-  Utils::calNormalIntegralImage(cloud_raw_depth,-1,0.02,10,true);
-  Utils::passFilterPointCloud(cloud_raw_depth,cloud_raw_depth,"z",0.1,2.0);
-  pcl::transformPointCloudWithNormals(*cloud_raw_depth, *cloud_raw_depth, cur_in_model);
-  pcl::io::savePLYFile(out_dir+"cloud_raw_depth.ply",*cloud_raw_depth);
-
-  cv::Mat color_viz = _newframe->_vis.clone();
-  PointCloudRGBNormal::Ptr cur_model(new PointCloudRGBNormal);
-  pcl::transformPointCloudWithNormals(*(_data_loader->_real_model),*cur_model,ob_in_cam);
-  for (int h=0;h<_newframe->_H;h++)
+  if ((*yml)["LOG"].as<int>()>0)
   {
-    for (int w=0;w<_newframe->_W;w++)
+    cv::Mat color_viz = _newframe->_vis.clone();
+    PointCloudRGBNormal::Ptr cur_model(new PointCloudRGBNormal);
+    pcl::transformPointCloudWithNormals(*(_data_loader->_real_model),*cur_model,ob_in_cam);
+    for (int h=0;h<_newframe->_H;h++)
     {
-      auto &bgr = color_viz.at<cv::Vec3b>(h,w);
-      if (_newframe->_fg_mask.at<uchar>(h,w)==0)
+      for (int w=0;w<_newframe->_W;w++)
       {
-        for (int i=0;i<3;i++)
+        auto &bgr = color_viz.at<cv::Vec3b>(h,w);
+        if (_newframe->_fg_mask.at<uchar>(h,w)==0)
         {
-          bgr[i] = (uchar)bgr[i]*0.2;
+          for (int i=0;i<3;i++)
+          {
+            bgr[i] = (uchar)bgr[i]*0.2;
+          }
         }
       }
     }
-  }
-  Utils::drawProjectPoints(cur_model,_data_loader->_K,color_viz);
-  cv::putText(color_viz,_newframe->_id_str,{5,30},cv::FONT_HERSHEY_PLAIN,2,{255,0,0},1,8,false);
-  cv::imshow("color_viz",color_viz);
-  cv::waitKey(1);
-  cv::imwrite(debug_dir+"/color_viz/"+_newframe->_id_str+"_color_viz.jpg",color_viz,{CV_IMWRITE_JPEG_QUALITY, 80});
-  cv::imwrite(out_dir+"color_viz.jpg",color_viz,{CV_IMWRITE_JPEG_QUALITY, 80});
+    Utils::drawProjectPoints(cur_model,_data_loader->_K,color_viz);
+    cv::putText(color_viz,_newframe->_id_str,{5,30},cv::FONT_HERSHEY_PLAIN,2,{255,0,0},1,8,false);
+    // cv::imshow("color_viz",color_viz);
+    // cv::waitKey(1);
+    cv::imwrite(debug_dir+"/color_viz/"+_newframe->_id_str+"_color_viz.jpg",color_viz,{CV_IMWRITE_JPEG_QUALITY, 80});
+    cv::imwrite(out_dir+"color_viz.jpg",color_viz,{CV_IMWRITE_JPEG_QUALITY, 80});
 
-  const std::string raw_dir = debug_dir+"/color_raw/";
-  if (!boost::filesystem::exists(raw_dir))
-  {
-    system(std::string("mkdir -p "+raw_dir).c_str());
+    const std::string raw_dir = debug_dir+"/color_raw/";
+    if (!boost::filesystem::exists(raw_dir))
+    {
+      system(std::string("mkdir -p "+raw_dir).c_str());
+    }
+    cv::imwrite(raw_dir+_newframe->_id_str+"_color_raw.png",_newframe->_color);
   }
-  cv::imwrite(raw_dir+_newframe->_id_str+"_color_raw.png",_newframe->_color);
 }

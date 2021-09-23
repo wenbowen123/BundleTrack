@@ -119,6 +119,10 @@ void readDirectory(const std::string& name, std::vector<std::string>& v)
 {
   v.clear();
   DIR *dirp = opendir(name.c_str());
+  if (dirp==NULL)
+  {
+    printf("Reading directory failed: %s\n",name.c_str());
+  }
   struct dirent *dp;
   while ((dp = readdir(dirp)) != NULL)
   {
@@ -129,68 +133,6 @@ void readDirectory(const std::string& name, std::vector<std::string>& v)
   closedir(dirp);
   std::sort(v.begin(),v.end());
 }
-
-
-
-template<class PointT>
-void calCloudNormal(boost::shared_ptr<pcl::PointCloud<PointT> > cloud, float radius)
-{
-  pcl::NormalEstimationOMP<PointT, pcl::Normal> ne;
-  unsigned NUM_CPU = std::thread::hardware_concurrency();
-  ne.setNumberOfThreads(NUM_CPU);
-  ne.setInputCloud (cloud);
-  boost::shared_ptr<pcl::search::KdTree<PointT> > tree (new pcl::search::KdTree<PointT>);
-  pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
-
-  ne.setSearchMethod (tree);
-  ne.setRadiusSearch (radius);
-  ne.compute (*cloud_normals);
-
-  pcl::concatenateFields (*cloud, *cloud_normals, *cloud);
-}
-template void calCloudNormal<pcl::PointXYZRGBNormal>(boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBNormal> > cloud, float radius);
-template void calCloudNormal<pcl::PointSurfel>(boost::shared_ptr<pcl::PointCloud<pcl::PointSurfel> > cloud, float radius);
-
-
-
-template <class PointT>
-void calNormalIntegralImage(boost::shared_ptr<pcl::PointCloud<PointT>> cloud, int method, float max_depth_change_factor, float smooth_size, bool depth_dependent_smooth)
-{
-  pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
-
-  pcl::IntegralImageNormalEstimation<PointT, pcl::Normal> ne;
-  ne.setViewPoint(0.0, 0.0, 0.0);
-  if (depth_dependent_smooth)
-  {
-    ne.setDepthDependentSmoothing(true);
-  }
-  else
-  {
-    ne.setDepthDependentSmoothing(false);
-  }
-  switch (method)
-  {
-    case 0:
-      ne.setNormalEstimationMethod(ne.COVARIANCE_MATRIX);
-      break;
-    case 1:
-      ne.setNormalEstimationMethod(ne.AVERAGE_3D_GRADIENT);
-      break;
-    case 2:
-      ne.setNormalEstimationMethod(ne.AVERAGE_DEPTH_CHANGE);
-      break;
-    default:
-      ne.setNormalEstimationMethod(ne.SIMPLE_3D_GRADIENT );
-  }
-
-  ne.setMaxDepthChangeFactor(max_depth_change_factor);
-  ne.setNormalSmoothingSize(smooth_size);
-  ne.setInputCloud(cloud);
-  ne.compute(*normals);
-
-  pcl::concatenateFields (*cloud, *normals, *cloud);
-}
-template void calNormalIntegralImage<pcl::PointXYZRGBNormal>(boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBNormal>> cloud, int method, float max_depth_change_factor, float smooth_size,bool depth_dependent_smooth);
 
 
 template<class PointT>
@@ -206,18 +148,6 @@ template void downsamplePointCloud<pcl::PointXYZRGB>(boost::shared_ptr<pcl::Poin
 template void downsamplePointCloud<pcl::PointXYZ>(boost::shared_ptr<pcl::PointCloud<pcl::PointXYZ> > cloud_in, boost::shared_ptr<pcl::PointCloud<pcl::PointXYZ> > cloud_out, float vox_size);
 template void downsamplePointCloud<pcl::PointNormal>(boost::shared_ptr<pcl::PointCloud<pcl::PointNormal> > cloud_in, boost::shared_ptr<pcl::PointCloud<pcl::PointNormal> > cloud_out, float vox_size);
 template void downsamplePointCloud<pcl::PointSurfel>(boost::shared_ptr<pcl::PointCloud<pcl::PointSurfel> > cloud_in, boost::shared_ptr<pcl::PointCloud<pcl::PointSurfel> > cloud_out, float vox_size);
-
-template<class PointT>
-void passFilterPointCloud(boost::shared_ptr<pcl::PointCloud<PointT> > cloud_in, boost::shared_ptr<pcl::PointCloud<PointT> > cloud_out, const std::string &axis, float min, float max)
-{
-  pcl::PassThrough<PointT> pass;
-  pass.setInputCloud (cloud_in);
-  pass.setFilterFieldName (axis);
-  pass.setFilterLimits (min, max);
-  pass.filter (*cloud_out);
-}
-template void passFilterPointCloud<pcl::PointXYZRGBNormal>(boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBNormal> > cloud_in, boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBNormal> > cloud_out, const std::string &axis, float min, float max);
-template void passFilterPointCloud<pcl::PointXYZRGB>(boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB> > cloud_in, boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB> > cloud_out, const std::string &axis, float min, float max);
 
 
 

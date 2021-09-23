@@ -1,5 +1,5 @@
-data_dir: /media/bowen/e25c9489-2f57-42dd-b076-021c59369fec/DATASET/NOCS/real_test/scene_4/
-mask_dir: /media/bowen/e25c9489-2f57-42dd-b076-021c59369fec/github/category_pick_place/BundleTrack/masks/transductive_vos.nocs.maskrcnn_realtrain/scene_2_model_bottle_red_stanford_norm  # Path to segmentation masks
+data_dir: /media/bowen/e25c9489-2f57-42dd-b076-021c59369fec/DATASET/NOCS/real_test/scene_2/
+mask_dir: /home/bowen/debug/BundleTrack/masks/transductive_vos.nocs.maskrcnn_realtrain/scene_2_model_bottle_red_stanford_norm  # Path to segmentation masks
 use_6pack_datalist: True
 
 model_name: bottle_red_stanford_norm

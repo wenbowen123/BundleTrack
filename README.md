@@ -54,9 +54,8 @@ For convenience of benchmarking and making plots, results of pose outputs can be
 - For YCBInEOAT: https://archive.cs.rutgers.edu/archive/a/2021/pracsys/2021_iros_bundletrack/ycbineoat_ours_results.tar.gz
 
 
-# Getting Started
 
-## Setup
+# Setup
 For the environment setup, it's strongly recommended to use our provided docker environment (setting up from scratch is very complicated and not supported in this repo). For this, you don't have to know how docker works. Only some basic commands are needed and will be provided in the below steps.
 
 - Install docker (https://docs.docker.com/get-docker/).
@@ -67,10 +66,6 @@ For the environment setup, it's strongly recommended to use our provided docker 
   docker pull wenbowen123/lf-net-release-env:latest
   ```
 
-- Download neural network weights
-  - Download https://archive.cs.rutgers.edu/archive/a/2021/pracsys/2021_iros_bundletrack/indoor.tar.gz, extract and put it under `lf-net-release/release/models`, so it'll be `lf-net-release/release/models/indoor/...`
-  - Download https://archive.cs.rutgers.edu/archive/a/2021/pracsys/2021_iros_bundletrack/pretrained.tar.gz, extract and put it under `./transductive-vos.pytorch`, so it'll be `./transductive-vos.pytorch/pretrained/...`
-
 - Edit the docker/run_container.sh, update the paths of `BUNDLETRACK_DIR`, `NOCS_DIR` and `YCBINEOAT_DIR`
 
 - Run `bash docker/run_container.sh`
@@ -80,26 +75,52 @@ For the environment setup, it's strongly recommended to use our provided docker 
 - `rm -rf build && mkdir build && cd build && cmake .. && make`
 
 
+# Data
+Depending on what you want to run, download those data that are neccessary.
+- [Download weights of feature detection network](https://archive.cs.rutgers.edu/archive/a/2021/pracsys/2021_iros_bundletrack/indoor.tar.gz), extract and put it under `lf-net-release/release/models`, so it'll be `BundleTrack/lf-net-release/release/models/indoor`
+- [Download weights of video segmentation network](https://archive.cs.rutgers.edu/archive/a/2021/pracsys/2021_iros_bundletrack/pretrained.tar.gz), extract and put it under `./transductive-vos.pytorch`, so it'll be `BundleTrack/transductive-vos.pytorch/pretrained`
+- [Download our precomputed masks](https://archive.cs.rutgers.edu/archive/a/2021/pracsys/2021_iros_bundletrack/masks.tar.gz), extract and put in the repo so it becomes `BundleTrack/masks`
 
-## Run predictions on NOCS
-- Download NOCS Dataset from http://download.cs.stanford.edu/orion/nocs/real_test.zip, then put it under a folder named "NOCS". And download the addon from https://drive.google.com/file/d/1BknMsoRKRV-nhLDpozog2Lrz1OWTKqkM/view?usp=sharing. Finally unzip the files and make sure the path structure is like this:
+- [Download NOCS Dataset](https://github.com/hughw19/NOCS_CVPR2019), then put it under a folder named "NOCS". [Download the converted ground-truth text pose files](https://archive.cs.rutgers.edu/archive/a/2021/pracsys/2021_iros_bundletrack/real_test_text.tar.gz). And [download the addon](https://drive.google.com/file/d/1BknMsoRKRV-nhLDpozog2Lrz1OWTKqkM/view?usp=sharing). Finally unzip the files and make sure the path structure is like this:
 
   ```
   NOCS
   ├── NOCS-REAL275-additional
-  └── real_test
+  ├── real_test
+  ├── gts
+  |     └── real_test_text
+  └── obj_models
   ```
 
+- [Download YCBInEOAT](https://archive.cs.rutgers.edu/archive/a/2020/pracsys/Bowen/iros2020/YCBInEOAT/) to make it like
+  ```
+  YCBInEOAT
+      ├── bleach0
+      |       ├──annotated_poses
+      |       ├──depth
+      |       ├──depth_filled
+      |       ├──gt_mask
+      |       ├──masks
+      |       ├──masks_vis
+      |       ├──rgb
+      |       ├──cam_K.txt
+      |       ├──......
+      └── ....
+  ```
+
+- [Download YCB Objects](http://ycb-benchmarks.s3-website-us-east-1.amazonaws.com/)
+
+# Run predictions on NOCS
 - Open a separate terminal and run
 
   ```
   bash lf-net-release/docker/run_container.sh
   cd [PATH_TO_BUNDLETRACK]
-  python lf-net-release/run_server.py
+  cd lf-net-release && python run_server.py
   ```
 
 
-- Go back to the terminal where you launched the bundletrack docker in above
+- Go back to the terminal where you launched the bundletrack docker in above and run below. The output will be saved to `debug_dir` specified in config file. By default it's `/tmp/BundleTrack/`. For more detailed logs, change `LOG` to 2 or higher in `config_nocs.yml`.
 
   ```
   python scripts/run_nocs.py --nocs_dir [PATH_TO_NOCS] --scene_id 1 --port 5555 --model_name can_arizona_tea_norm
@@ -108,31 +129,31 @@ For the environment setup, it's strongly recommended to use our provided docker 
 - Finally, the results will be saved in `/tmp/BundleTrack/`
 
 
-- For evaluating on the entire NOCS Dataset (by default this will add perturbation to the initial ground-truth pose), run
+- For evaluating on the entire NOCS Dataset, run (**NOTE that this will add noise to perturb the initial ground-truth pose for evaluation as explained in the paper. If you want to see how BundleTrack actually performs, run the above section**)
   ```
   python scripts/eval_nocs.py --nocs_dir [PAHT TO NOCS]  --results_dir [PATH TO THE RUNNING OUTPUTS]
   ```
 
 
-## Run predictions on YCBInEOAT
+# Run predictions on YCBInEOAT
 
-- Download YCBInEOAT from https://archive.cs.rutgers.edu/archive/a/2020/pracsys/Bowen/iros2020/YCBInEOAT/
+- Change the `model_name` and `model_dir` in `config_ycbineoat.yml` to the path to the .obj file (e.g. For folder `bleach0`, the model_name is `021_bleach_cleanser`, and model_dir is `[Your path to YCB Objects]/021_bleach_cleanser/textured_simple.obj`)
 
 - Open a separate terminal and run
 
   ```
   bash lf-net-release/docker/run_container.sh
   cd [PATH_TO_BUNDLETRACK]
-  python lf-net-release/run_server.py
+  cd lf-net-release && python run_server.py
   ```
 
-- Go back to the terminal where you launched the bundletrack docker in above, and run
+- Go back to the terminal where you launched the bundletrack docker in above, and run below. The output will be saved to `debug_dir` specified in config file. By default it's `/tmp/BundleTrack/`
 
   ```
   python scripts/run_ycbineoat.py --data_dir [PATH_TO_YCBInEOAT] --port 5555 --model_name [The YCB object's name, e.g. 021_bleach_cleanser]
   ```
 
-- Finally, the results will be saved in `/tmp/BundleTrack/`
+- Finally, the results will be saved in `/tmp/BundleTrack/`. For more detailed logs, change `LOG` to 2 or higher in `config_ycbineoat.yml`.
 
 - For evaluating on the entire YCBInEOAT Dataset, run
   ```
@@ -140,7 +161,7 @@ For the environment setup, it's strongly recommended to use our provided docker 
   ```
 
 
-## Run predictions on your own RGBD data
+# Run predictions on your own RGBD data
 
 - Download YCBInEOAT, if you haven't done so in above.
 
@@ -149,7 +170,7 @@ For the environment setup, it's strongly recommended to use our provided docker 
   ```
   bash lf-net-release/docker/run_container.sh
   cd [PATH_TO_BUNDLETRACK]
-  python lf-net-release/run_server.py
+  cd lf-net-release && python run_server.py
   ```
 
 - Prepare segmentation masks. In YCBInEOAT Dataset, we computed masks from robotic arm forward kinematics. If your scene is not too complicated similar to NOCS Dataset, you can run the video segmentation network to get masks as below:
@@ -167,7 +188,7 @@ For the environment setup, it's strongly recommended to use our provided docker 
     └── cam_K.txt
     ```
 
-- Go back to the terminal where you launched the bundletrack docker, run
+- Go back to the terminal where you launched the bundletrack docker, run below. The output will be saved to `debug_dir` specified in config file. By default it's `/tmp/BundleTrack/`
   ```
   python scripts/run_ycbineoat.py --data_dir [PATH TO YOUR FOLDER ABOVE] --port 5555
   ```

@@ -81,11 +81,11 @@ SiftManager::SiftManager(std::shared_ptr<YAML::Node> yml1, Bundler *bundler) : _
   srand(0);
   _rng.seed(0);
 
-  _detector = cv::xfeatures2d::SIFT::create(0,
-                                          (*yml)["sift"]["nOctaveLayers"].as<int>(),
-                                          (*yml)["sift"]["contrastThreshold"].as<float>(),
-                                          (*yml)["sift"]["edgeThreshold"].as<float>(),
-                                          (*yml)["sift"]["sigma"].as<float>());
+  // _detector = cv::xfeatures2d::SIFT::create(0,
+  //                                         (*yml)["sift"]["nOctaveLayers"].as<int>(),
+  //                                         (*yml)["sift"]["contrastThreshold"].as<float>(),
+  //                                         (*yml)["sift"]["edgeThreshold"].as<float>(),
+  //                                         (*yml)["sift"]["sigma"].as<float>());
 
 }
 
@@ -97,27 +97,27 @@ SiftManager::~SiftManager()
 
 void SiftManager::detectFeature(std::shared_ptr<Frame> frame)
 {
-  if (frame->_keypts.size()>0) return;
-  std::vector<float> scales = (*yml)["sift"]["scales"].as<std::vector<float>>();
-  for (int i=0;i<scales.size();i++)
-  {
-    const auto &scale = scales[i];
-    cv::Mat cur;
-    cv::resize(frame->_gray, cur, {0,0}, scale,scale);
-    std::vector<cv::KeyPoint> keypts;
-    cv::Mat des;
-    _detector->detectAndCompute(cur, cv::noArray(), keypts, des);
-    for (int ii=0;ii<keypts.size();ii++)
-    {
-      keypts[ii].pt.x = keypts[ii].pt.x/scale;
-      keypts[ii].pt.y = keypts[ii].pt.y/scale;
-    }
-    frame->_keypts.insert(frame->_keypts.end(),keypts.begin(),keypts.end());
-    if (frame->_feat_des.rows>0)
-      cv::vconcat(frame->_feat_des,des,frame->_feat_des);
-    else
-      frame->_feat_des = des;
-  }
+  // if (frame->_keypts.size()>0) return;
+  // std::vector<float> scales = (*yml)["sift"]["scales"].as<std::vector<float>>();
+  // for (int i=0;i<scales.size();i++)
+  // {
+  //   const auto &scale = scales[i];
+  //   cv::Mat cur;
+  //   cv::resize(frame->_gray, cur, {0,0}, scale,scale);
+  //   std::vector<cv::KeyPoint> keypts;
+  //   cv::Mat des;
+  //   _detector->detectAndCompute(cur, cv::noArray(), keypts, des);
+  //   for (int ii=0;ii<keypts.size();ii++)
+  //   {
+  //     keypts[ii].pt.x = keypts[ii].pt.x/scale;
+  //     keypts[ii].pt.y = keypts[ii].pt.y/scale;
+  //   }
+  //   frame->_keypts.insert(frame->_keypts.end(),keypts.begin(),keypts.end());
+  //   if (frame->_feat_des.rows>0)
+  //     cv::vconcat(frame->_feat_des,des,frame->_feat_des);
+  //   else
+  //     frame->_feat_des = des;
+  // }
 
 }
 
@@ -263,9 +263,15 @@ void SiftManager::findCorresbyNN(std::shared_ptr<Frame> frameA, std::shared_ptr<
   std::vector< std::vector<cv::DMatch> > knn_matchesAB, knn_matchesBA;
   const int k_near = 5;
 
+#if NO_OPENCV_CUDA
+  cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE);
+  matcher->knnMatch( frameA->_feat_des, frameB->_feat_des, knn_matchesAB, k_near);
+  matcher->knnMatch( frameB->_feat_des, frameA->_feat_des, knn_matchesBA, k_near);
+#else
   cv::Ptr<cv::cuda::DescriptorMatcher> matcher = cv::cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L2);
   matcher->knnMatch( frameA->_feat_des_gpu, frameB->_feat_des_gpu, knn_matchesAB, k_near);
   matcher->knnMatch( frameB->_feat_des_gpu, frameA->_feat_des_gpu, knn_matchesBA, k_near);
+#endif
 
   pruneMatches(frameA,frameB,knn_matchesAB,matches_AB);
 
@@ -370,36 +376,62 @@ void SiftManager::findCorresbyNNMultiPair(std::vector<FramePair> &pairs)
   const float cos_max_normal_neighbor = std::cos((*yml)["feature_corres"]["max_normal_neighbor"].as<float>()/180.0*M_PI);
   const int k_near = 5;
 
+
+#if NO_OPENCV_CUDA
+  cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::BRUTEFORCE);
+  std::vector<std::vector<std::vector<cv::DMatch>>> matchesABs(pairs.size()), matchesBAs(pairs.size());
+#else
+  cv::Ptr<cv::cuda::DescriptorMatcher> matcher = cv::cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L2);
   std::vector<cv::cuda::Stream> streams(pairs.size()*2);
   std::vector<cv::cuda::GpuMat> matchesAB_gpus(pairs.size()), matchesBA_gpus(pairs.size());
-  cv::Ptr<cv::cuda::DescriptorMatcher> matcher = cv::cuda::DescriptorMatcher::createBFMatcher(cv::NORM_L2);
+#endif
+
   for (int i=0;i<pairs.size();i++)
   {
     auto &fA = pairs[i].first;
     auto &fB = pairs[i].second;
+#if NO_OPENCV_CUDA
+    matcher->knnMatch(fA->_feat_des, fB->_feat_des, matchesABs[i], k_near);
+    if (mutual)
+    {
+      matcher->knnMatch(fB->_feat_des, fA->_feat_des, matchesBAs[i], k_near);
+    }
+#else
     matcher->knnMatchAsync(fA->_feat_des_gpu, fB->_feat_des_gpu, matchesAB_gpus[i], k_near, cv::noArray(), streams[2*i]);
     if (mutual)
     {
       matcher->knnMatchAsync(fB->_feat_des_gpu, fA->_feat_des_gpu, matchesBA_gpus[i], k_near, cv::noArray(), streams[2*i+1]);
     }
+#endif
   }
 
+#if NO_OPENCV_CUDA==0
   for (int i=0;i<pairs.size();i++)
   {
     streams[2*i].waitForCompletion();
     streams[2*i+1].waitForCompletion();
   }
+#endif
 
   for (int i=0;i<pairs.size();i++)
   {
     auto &fA = pairs[i].first;
     auto &fB = pairs[i].second;
     std::vector< std::vector<cv::DMatch> > knn_matchesAB, knn_matchesBA;
+
+#if NO_OPENCV_CUDA
+    knn_matchesAB = matchesABs[i];
+    if (mutual)
+    {
+      knn_matchesBA = matchesBAs[i];
+    }
+#else
     matcher->knnMatchConvert(matchesAB_gpus[i], knn_matchesAB);
     if (mutual)
     {
       matcher->knnMatchConvert(matchesBA_gpus[i], knn_matchesBA);
     }
+#endif
     std::vector<cv::DMatch> matchesAB, matchesBA;
     pruneMatches(fA,fB,knn_matchesAB,matchesAB);
     if (mutual)

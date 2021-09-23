@@ -171,17 +171,6 @@ void readDirectory(const std::string& name, std::vector<std::string>& v);
 template<class PointType>
 void downsamplePointCloud(boost::shared_ptr<pcl::PointCloud<PointType> > cloud_in, boost::shared_ptr<pcl::PointCloud<PointType> > cloud_out, float vox_size);
 
-template<class PointT>
-void passFilterPointCloud(boost::shared_ptr<pcl::PointCloud<PointT> > cloud_in, boost::shared_ptr<pcl::PointCloud<PointT> > cloud_out, const std::string &axis, float min, float max);
-
-template<class PointType>
-void calCloudNormal(boost::shared_ptr<pcl::PointCloud<PointType> > cloud, float radius);
-
-
-template <class PointT>
-void calNormalIntegralImage(boost::shared_ptr<pcl::PointCloud<PointT>> cloud, int method, float max_depth_change_factor, float smooth_size,bool depth_dependent_smooth);
-
-
 void parsePoseTxt(std::string filename, Eigen::Matrix4f &out);
 
 void normalizeRotationMatrix(Eigen::Matrix3f &R);
