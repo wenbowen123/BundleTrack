@@ -3,7 +3,7 @@ mask_dir: /home/robot-learning/Projects/ws_Haonan/BundleTrack/data/sugar_box1/gt
 model_name: 004_sugar_box
 model_dir: /home/robot-learning/Projects/ws_Haonan/BundleTrack/data/models/004_sugar_box_berkeley_meshes/004_sugar_box/poisson/textured.obj
 debug_dir: /home/robot-learning/Projects/ws_Haonan/BundleTrack/log
-LOG: 0
+LOG: 1
 port: '5556'
 
 depth_processing:
