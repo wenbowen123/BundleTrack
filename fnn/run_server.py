@@ -29,7 +29,7 @@ if __name__ == "__main__":
     socket.bind(port)
 
     while 1:
-        print(f"r2d2 listending to {port}")
+        print(f"FNN listending to {port}")
         msgs = socket.recv_multipart(0)
         assert len(msgs) == 2, "#msgs={}".format(len(msgs))
         wh = np.frombuffer(msgs[0], dtype=np.int32)

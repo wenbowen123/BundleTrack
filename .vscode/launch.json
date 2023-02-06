@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "r2d2 (server)",
+            "name": "fnn (server)",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/r2d2/run_server.py",
+            "program": "${workspaceFolder}/fnn/run_server.py",
             "args": [
                 "--port=5556"
             ],
