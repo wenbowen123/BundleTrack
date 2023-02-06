@@ -8,3 +8,4 @@ Code is not compatible to CUDA11.
 
 1. Install LibZMQ.
 2. Install opencv with cuda support.
+3. Cooperate R2D2 with BundleTrack.

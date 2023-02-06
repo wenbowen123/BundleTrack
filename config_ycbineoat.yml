@@ -1,8 +1,8 @@
-data_dir: /media/bowen/e25c9489-2f57-42dd-b076-021c59369fec/catkin_ws/src/iros20_dataset/video_rosbag/IROS_SELECTED/FINISHED_LABEL.iros_submission_version/bleach0
-mask_dir: '/media/bowen/e25c9489-2f57-42dd-b076-021c59369fec/catkin_ws/src/iros20_dataset/video_rosbag/IROS_SELECTED/FINISHED_LABEL.iros_submission_version/bleach0/masks'
-model_name: 021_bleach_cleanser
-model_dir: /media/bowen/e25c9489-2f57-42dd-b076-021c59369fec/DATASET/YCB_Video_Dataset/CADmodels/021_bleach_cleanser/textured_simple.obj
-debug_dir: /tmp/BundleTrack/
+data_dir: /home/robot-learning/Projects/ws_Haonan/BundleTrack/data/sugar_box1
+mask_dir: /home/robot-learning/Projects/ws_Haonan/BundleTrack/data/sugar_box1/gt_mask
+model_name: 004_sugar_box
+model_dir: /home/robot-learning/Projects/ws_Haonan/BundleTrack/data/models/004_sugar_box_berkeley_meshes/004_sugar_box/poisson/textured.obj
+debug_dir: /home/robot-learning/Projects/ws_Haonan/BundleTrack/log
 LOG: 0
 port: '5555'
 

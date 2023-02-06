@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 project(BundleTrack)
 
 
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 add_compile_options(-std=c++14 -fpermissive -fPIC -g)
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -Xcompiler;-fPIC;-gencode arch=compute_86,code=sm_86;-O3;-std=c++11;-use_fast_math;--default-stream per-thread)
 
