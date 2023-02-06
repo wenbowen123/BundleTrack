@@ -5,3 +5,5 @@ build/
 *.pkl
 lf-net-release/release/models
 data
+r2d2
+log

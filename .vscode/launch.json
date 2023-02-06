@@ -5,15 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "fnn (server)",
+            "name": "r2d2 (server)",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/fnn/run_server.py",
+            "program": "${workspaceFolder}/r2d2/run_server.py",
             "args": [
-                "--port=5556"
+                "--port=5556",
+                "--model=models/r2d2_WASF_N16.pt"
             ],
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/r2d2"
         },
         {
             "name": "bundle_track_ycb",
