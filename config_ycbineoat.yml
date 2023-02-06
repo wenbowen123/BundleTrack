@@ -4,7 +4,7 @@ model_name: 004_sugar_box
 model_dir: /home/robot-learning/Projects/ws_Haonan/BundleTrack/data/models/004_sugar_box_berkeley_meshes/004_sugar_box/poisson/textured.obj
 debug_dir: /home/robot-learning/Projects/ws_Haonan/BundleTrack/log
 LOG: 0
-port: '5555'
+port: '5556'
 
 depth_processing:
   erode:

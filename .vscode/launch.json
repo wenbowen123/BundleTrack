@@ -5,6 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "r2d2 (server)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/r2d2/run_server.py",
+            "args": [
+                "--port=5556"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "bundle_track_ycb",
             "type": "cppdbg",
             "request": "launch",
@@ -29,7 +40,6 @@
                     "ignoreFailures": true
                 }
             ]
-        }
-
+        },
     ]
 }
