@@ -4,7 +4,7 @@ project(BundleTrack)
 
 set(CMAKE_BUILD_TYPE Release)
 add_compile_options(-std=c++14 -fpermissive -fPIC -g)
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -Xcompiler;-fPIC;-gencode arch=compute_30,code=sm_30;-gencode arch=compute_61,code=sm_61;-gencode arch=compute_75,code=sm_75;-O3;-std=c++11;-use_fast_math;--default-stream per-thread)
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -Xcompiler;-fPIC;-gencode arch=compute_86,code=sm_86;-O3;-std=c++11;-use_fast_math;--default-stream per-thread)
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
   set(COMPILE_OPTIONS -fopenmp -march=native -msse -msse2 -msse3 -msse4 -msse4.2 -mavx2 -ftree-vectorize)

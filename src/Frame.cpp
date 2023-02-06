@@ -70,7 +70,7 @@ Frame::Frame(const cv::Mat &color, const cv::Mat &depth, const cv::Mat &depth_ra
   cudaMalloc(&_color_gpu, n_pixels*sizeof(uchar4));
 
 
-  cv::cvtColor(_color, _gray, CV_BGR2GRAY);
+  cv::cvtColor(_color, _gray, cv::COLOR_BGR2GRAY);
 
   updateDepthGPU();
   processDepth();

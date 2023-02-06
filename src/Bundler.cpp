@@ -399,8 +399,8 @@ void Bundler::saveNewframeResult()
     cv::putText(color_viz,_newframe->_id_str,{5,30},cv::FONT_HERSHEY_PLAIN,2,{255,0,0},1,8,false);
     // cv::imshow("color_viz",color_viz);
     // cv::waitKey(1);
-    cv::imwrite(debug_dir+"/color_viz/"+_newframe->_id_str+"_color_viz.jpg",color_viz,{CV_IMWRITE_JPEG_QUALITY, 80});
-    cv::imwrite(out_dir+"color_viz.jpg",color_viz,{CV_IMWRITE_JPEG_QUALITY, 80});
+    cv::imwrite(debug_dir+"/color_viz/"+_newframe->_id_str+"_color_viz.jpg",color_viz,{cv::IMWRITE_JPEG_QUALITY, 80});
+    cv::imwrite(out_dir+"color_viz.jpg",color_viz,{cv::IMWRITE_JPEG_QUALITY, 80});
 
     const std::string raw_dir = debug_dir+"/color_raw/";
     if (!boost::filesystem::exists(raw_dir))

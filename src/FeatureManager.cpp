@@ -791,7 +791,7 @@ void SiftManager::vizCorresBetween(std::shared_ptr<Frame> frameA, std::shared_pt
 
   cv::Mat out;
   cv::drawMatches( colorA, kptsA, colorB, kptsB, cv_matches, out, cv::Scalar::all(-1), cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-  cv::imwrite(out_match_file, out, {CV_IMWRITE_JPEG_QUALITY,80});
+  cv::imwrite(out_match_file, out, {cv::IMWRITE_JPEG_QUALITY,80});
 
 }
 
