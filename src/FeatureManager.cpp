@@ -760,7 +760,12 @@ int SiftManager::countInlierCorres(std::shared_ptr<Frame> frameA, std::shared_pt
 void SiftManager::vizCorresBetween(std::shared_ptr<Frame> frameA, std::shared_ptr<Frame> frameB, const std::string &name)
 {
   if ((*yml)["LOG"].as<int>()<1) return;
-  const std::string out_dir = (*yml)["debug_dir"].as<std::string>()+"/"+_bundler->_newframe->_id_str+"/";
+  const std::string out_dir = (*yml)["debug_dir"].as<std::string>()+"/match_viz/";
+  // std::cout<<out_dir<<std::endl;
+  if (!boost::filesystem::exists(out_dir))
+  {
+    system(std::string("mkdir -p "+out_dir).c_str());
+  }
   const std::string out_match_file = out_dir+frameA->_id_str+"_match_"+frameB->_id_str+"_"+name+".jpg";
   std::ifstream tmp(out_match_file);
   cv::Mat colorA = frameA->_color.clone();

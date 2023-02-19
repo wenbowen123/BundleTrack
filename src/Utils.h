@@ -179,7 +179,9 @@ bool isPixelInsideImage(const int H, const int W, float u, float v);
 
 
 void solveRigidTransformBetweenPoints(const Eigen::MatrixXf &points1, const Eigen::MatrixXf &points2, Eigen::Matrix4f &pose);
-void drawProjectPoints(PointCloudRGBNormal::Ptr cloud, const Eigen::Matrix3f &K, cv::Mat &out);
+void drawProjectPoints(PointCloudRGBNormal::Ptr cloud, const Eigen::Matrix3f &K, cv::Mat &out, const Eigen::Matrix4f &pose);
+std::vector<float> getMeanCoordinatesFromPCLCloud(PointCloudRGBNormal::Ptr initialCloud);
+void drawBBoxPCL(float x, float y, float z, const Eigen::Matrix3f &K, cv::Mat &out, const Eigen::Matrix4f &pose);
 
 template<int rows, int cols>
 void parseMatrixTxt(std::string filename, Eigen::Matrix<float,rows,cols> &out)

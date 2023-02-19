@@ -111,6 +111,39 @@ void convert3dOrganizedRGB(cv::Mat &objDepth, cv::Mat &colImage, Eigen::Matrix3f
       }
     }
 }
+
+
+std::vector<float> getBoundingBoxInitialCenterModelFree(cv::Mat &objDepth, cv::Mat &fgMask, Eigen::Matrix3f &camIntrinsic)
+{
+  const int imgWidth = objDepth.cols;
+  const int imgHeight = objDepth.rows;
+  
+  float x_mean = 0;
+  float y_mean = 0;
+  float z_mean = 0;
+  int num_points = 0;
+
+  for(int u = 0; u < imgHeight; u++)
+  {
+    for(int v = 0; v < imgWidth; v++)
+    {
+      float depth = objDepth.at<float>(u,v);
+      if(fgMask.at<uchar>(u,v) == 0 || depth <= 0.1 || depth >= 2.0)
+        continue;
+      x_mean += (float)((v - camIntrinsic(0,2)) * depth / camIntrinsic(0,0));
+      y_mean += (float)((u - camIntrinsic(1,2)) * depth / camIntrinsic(1,1));
+      z_mean += depth;
+    }
+  }
+
+  x_mean /= (float)num_points;
+  y_mean /= (float)num_points;
+  z_mean /= (float)num_points;
+
+  int gt_mean[3] = {x_mean,y_mean,z_mean};
+  return std::vector<float>(gt_mean,gt_mean+3);
+}
+
 template void convert3dOrganizedRGB(cv::Mat &objDepth, cv::Mat &colImage, Eigen::Matrix3f &camIntrinsic, boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB>> objCloud);
 template void convert3dOrganizedRGB(cv::Mat &objDepth, cv::Mat &colImage, Eigen::Matrix3f &camIntrinsic, boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBNormal>> objCloud);
 
@@ -218,7 +251,31 @@ void solveRigidTransformBetweenPoints(const Eigen::MatrixXf &points1, const Eige
 
 }
 
-void drawProjectPoints(PointCloudRGBNormal::Ptr cloud, const Eigen::Matrix3f &K, cv::Mat &out)
+std::pair<float,float> getProjectPointCoord3Dto2D(float x, float y, float z, const Eigen::Matrix3f &K, cv::Mat &out) {
+
+  int u = std::round(x*K(0,0)/z + K(0,2));
+  int v = std::round(y*K(1,1)/z + K(1,2));
+  if(u < 0)
+    u = 0;
+  else if(u >= out.cols)
+    u = (out.cols - 1);
+  if(v < 0)
+    v = 0;
+  else if(v >= out.rows)
+    v = (out.rows - 1);
+
+  cv::circle(out, {u,v}, 1, {0,255,255}, -1);
+  
+  return std::pair<float,float>(u,v);
+}
+
+void drawLine(cv::Mat &out, int x1, int y1, int x2, int y2, cv::Scalar color) {
+  cv::Point p1(x1,y1);
+  cv::Point p2(x2,y2);
+  cv::line(out,p1,p2,color,2);
+}
+
+void drawProjectPoints(PointCloudRGBNormal::Ptr cloud, const Eigen::Matrix3f &K, cv::Mat &out, const Eigen::Matrix4f &pose)
 {
   Utils::downsamplePointCloud(cloud,cloud,0.01);
   for (const auto &pt:cloud->points)
@@ -229,6 +286,62 @@ void drawProjectPoints(PointCloudRGBNormal::Ptr cloud, const Eigen::Matrix3f &K,
     cv::circle(out, {u,v}, 1, {0,255,255}, -1);
   }
 }
+
+std::vector<float> getMeanCoordinatesFromPCLCloud(PointCloudRGBNormal::Ptr initialCloud)
+{
+  float x_mean = 0;
+  float y_mean  = 0;
+  float z_mean = 0;
+  float x_sum = 0;
+  float y_sum = 0;
+  float z_sum = 0;
+  int num_points = 0;
+  for (const auto &pt:initialCloud->points)
+  {
+    x_sum += pt.x;
+    y_sum += pt.y;
+    z_sum += pt.z;
+    num_points++;
+  }
+
+  x_mean = x_sum/num_points;
+  y_mean = y_sum/num_points;
+  z_mean = z_sum/num_points;
+
+  float gt_mean[] = {x_mean,y_mean,z_mean};
+  return std::vector<float>(gt_mean,gt_mean+3);
+}
+
+void drawBBoxPCL(float x, float y, float z, const Eigen::Matrix3f &K, cv::Mat &out, const Eigen::Matrix4f &pose)
+{
+  
+  pcl::PointCloud<pcl::PointXYZ> bbox;
+  float x_adds[2] = {-0.05,0.05};
+  float y_adds[2] = {-0.05,0.05};
+  float z_adds[2] = {-0.05,0.05};
+  for(auto y_add : y_adds)
+    for(auto x_add : x_adds)
+      for(auto z_add : z_adds)
+        bbox.push_back(pcl::PointXYZ(x + x_add,y + y_add,z + z_add));
+
+  pcl::PointCloud<pcl::PointXYZ> bboxTrans;
+  pcl::transformPointCloud(bbox,bboxTrans,pose.inverse());
+
+  std::pair<float,float> p[8];
+  int idx = 0;
+  for(const auto &pt : bboxTrans.points)
+  {
+    p[idx] = getProjectPointCoord3Dto2D(pt.x,pt.y,pt.z,K,out);
+    idx++;
+  }
+
+  int lineStartingPoints[12] = {0,0,0,1,1,2,2,3,4,4,5,6};
+  int lineEndingPoints[12] = {1,2,4,3,5,3,6,7,5,6,7,7};
+
+  for(int i = 0; i < 12; i++)
+    drawLine(out,p[lineStartingPoints[i]].first,p[lineStartingPoints[i]].second,p[lineEndingPoints[i]].first,p[lineEndingPoints[i]].second,cv::Scalar(0,255,0));
+}
+
 
 } // namespace Utils
 

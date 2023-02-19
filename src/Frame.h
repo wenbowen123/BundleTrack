@@ -69,6 +69,7 @@ public:
   Status _status;
   bool _pose_inited;
   std::map<std::pair<float,float>, std::shared_ptr<MapPoint>> _map_points;
+  float _x_bbox_init,_y_bbox_init,_z_bbox_init;
 
   float *_depth_gpu;
   uchar4 *_color_gpu;
