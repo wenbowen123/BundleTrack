@@ -183,6 +183,7 @@ void drawProjectPoints(PointCloudRGBNormal::Ptr cloud, const Eigen::Matrix3f &K,
 std::vector<float> getMeanCoordinatesFromPCLCloud(PointCloudRGBNormal::Ptr initialCloud);
 std::vector<float> getBoundingBoxInitialCenterModelFree(cv::Mat &objDepth, cv::Mat &fgMask, Eigen::Matrix3f &camIntrinsic);
 void drawBBoxPCL(float x, float y, float z, const Eigen::Matrix3f &K, cv::Mat &out, const Eigen::Matrix4f &pose);
+void drawBBox(float x, float y, float z, const Eigen::Matrix3f &K, cv::Mat &out, const Eigen::Matrix4f &pose);
 
 template<int rows, int cols>
 void parseMatrixTxt(std::string filename, Eigen::Matrix<float,rows,cols> &out)

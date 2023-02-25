@@ -342,6 +342,45 @@ void drawBBoxPCL(float x, float y, float z, const Eigen::Matrix3f &K, cv::Mat &o
     drawLine(out,p[lineStartingPoints[i]].first,p[lineStartingPoints[i]].second,p[lineEndingPoints[i]].first,p[lineEndingPoints[i]].second,cv::Scalar(0,255,0));
 }
 
+void drawBBox(float x, float y, float z, const Eigen::Matrix3f &K, cv::Mat &out, const Eigen::Matrix4f &pose)
+{
+  // pcl::PointCloud<pcl::PointXYZ> bbox;
+  Eigen::MatrixXf bbox = Eigen::MatrixXf::Random(4,9);
+  int pointIdx = 0;
+  float x_adds[2] = {-0.05,0.05};
+  float y_adds[2] = {-0.05,0.05};
+  float z_adds[2] = {-0.05,0.05};
+  for(auto y_add : y_adds)
+    for(auto x_add : x_adds)
+      for(auto z_add : z_adds)
+      {
+        bbox(0,pointIdx) = x + x_add;
+        bbox(1,pointIdx) = y + y_add;
+        bbox(2,pointIdx) = z + z_add;
+        bbox(3,pointIdx) = 1;
+        pointIdx++;
+      }
+  
+  bbox(0,8) = x;
+  bbox(1,8) = y;
+  bbox(2,8) = z;
+
+  // pcl::PointCloud<pcl::PointXYZ> bboxTrans;
+  // pcl::transformPointCloud(bbox,bboxTrans,pose.inverse());
+  Eigen::MatrixXf bboxTrans = pose*bbox;
+
+  std::pair<float,float> p[9];
+  for(int idx = 0; idx < 9; idx++)
+    p[idx] = getProjectPointCoord3Dto2D(bboxTrans(0,idx),bboxTrans(1,idx),bboxTrans(2,idx),K,out);
+
+  cv::circle(out, {p[8].first,p[8].second}, 4, {0,0,255}, -1);
+
+  int lineStartingPoints[12] = {0,0,0,1,1,2,2,3,4,4,5,6};
+  int lineEndingPoints[12] = {1,2,4,3,5,3,6,7,5,6,7,7};
+
+  for(int i = 0; i < 12; i++)
+    drawLine(out,p[lineStartingPoints[i]].first,p[lineStartingPoints[i]].second,p[lineEndingPoints[i]].first,p[lineEndingPoints[i]].second,cv::Scalar(0,255,0));
+}
 
 } // namespace Utils
 
