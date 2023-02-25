@@ -63,12 +63,15 @@ int main(int argc, char **argv)
 
   Bundler bundler(yml,&data_loader);
 
+  const bool custom_yc = (*yml)["custom_yc"].as<bool>();
+
   while (data_loader.hasNext())
   {
-    std::shared_ptr<Frame> frame = data_loader.next();
+    std::shared_ptr<Frame> frame = (custom_yc) ? data_loader.nextCustom() : data_loader.next();
     if (!frame) break;
     const std::string index_str = frame->_id_str;
-    const std::string out_dir = (*yml)["debug_dir"].as<std::string>()+"/"+index_str+"/";
+    const std::string out_dir = (*yml)["debug_dir"].as<std::string>();
+    
     cv::imwrite(out_dir+index_str+"_color.png",frame->_color);
 
     Eigen::Matrix4f cur_in_model(data_loader._ob_in_cam0.inverse());

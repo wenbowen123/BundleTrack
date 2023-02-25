@@ -160,6 +160,10 @@ void Bundler::processNewFrame(std::shared_ptr<Frame> frame)
 
   if (frame->_id==0)
   {
+    std::vector<float> initialBBoxCenter = Utils::getBoundingBoxInitialCenterModelFree(frame->_depth,frame->_fg_mask,_data_loader->_K);
+    frame->_x_bbox_init = initialBBoxCenter[0];
+    frame->_y_bbox_init = initialBBoxCenter[1];
+    frame->_z_bbox_init = initialBBoxCenter[2];
     checkAndAddKeyframe(frame);
     return;
   }
@@ -395,12 +399,28 @@ void Bundler::saveNewframeResult()
         }
       }
     }
-    Utils::drawProjectPoints(cur_model,_data_loader->_K,color_viz);
+
+    if (_newframe->_id==0)
+    {
+      std::vector<float> initialBBoxCenter = Utils::getBoundingBoxInitialCenterModelFree(_newframe->_depth,_newframe->_fg_mask,_data_loader->_K);
+      _newframe->_x_bbox_init = initialBBoxCenter[0];
+      _newframe->_y_bbox_init = initialBBoxCenter[1];
+      _newframe->_z_bbox_init = initialBBoxCenter[2];
+    }
+
+    Utils::drawProjectPoints(cur_model,_data_loader->_K,color_viz,_newframe->_pose_in_model);
+    Utils::drawBBoxPCL(_newframe->_x_bbox_init,_newframe->_y_bbox_init,_newframe->_z_bbox_init,_data_loader->_K,color_viz,_newframe->_pose_in_model);
     cv::putText(color_viz,_newframe->_id_str,{5,30},cv::FONT_HERSHEY_PLAIN,2,{255,0,0},1,8,false);
     // cv::imshow("color_viz",color_viz);
     // cv::waitKey(1);
-    cv::imwrite(debug_dir+"/color_viz/"+_newframe->_id_str+"_color_viz.jpg",color_viz,{CV_IMWRITE_JPEG_QUALITY, 80});
-    cv::imwrite(out_dir+"color_viz.jpg",color_viz,{CV_IMWRITE_JPEG_QUALITY, 80});
+    cv::imwrite(debug_dir+"/color_viz/"+_newframe->_id_str+"_color_viz.jpg",color_viz,{cv::IMWRITE_JPEG_QUALITY, 80});
+    const std::string color_viz_out_dir = debug_dir+"color_viz/";
+    if (!boost::filesystem::exists(color_viz_out_dir))
+    {
+      system(std::string("mkdir -p "+color_viz_out_dir).c_str());
+    }
+
+    cv::imwrite(color_viz_out_dir+_newframe->_id_str+"_color_viz.jpg",color_viz,{CV_IMWRITE_JPEG_QUALITY, 80});
 
     const std::string raw_dir = debug_dir+"/color_raw/";
     if (!boost::filesystem::exists(raw_dir))

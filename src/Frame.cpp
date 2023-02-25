@@ -63,6 +63,9 @@ Frame::Frame(const cv::Mat &color, const cv::Mat &depth, const cv::Mat &depth_ra
   _real_model = real_model;
   _pose_inited = false;
   _roi = roi;
+  _x_bbox_init = 0;
+  _y_bbox_init = 0;
+  _z_bbox_init = 0;
 
   const int n_pixels = _H*_W;
   cudaMalloc(&_depth_gpu, n_pixels*sizeof(float));
@@ -70,7 +73,7 @@ Frame::Frame(const cv::Mat &color, const cv::Mat &depth, const cv::Mat &depth_ra
   cudaMalloc(&_color_gpu, n_pixels*sizeof(uchar4));
 
 
-  cv::cvtColor(_color, _gray, CV_BGR2GRAY);
+  cv::cvtColor(_color, _gray, cv::COLOR_BGR2GRAY);
 
   updateDepthGPU();
   processDepth();

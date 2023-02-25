@@ -383,4 +383,45 @@ std::shared_ptr<Frame> DataLoaderYcbineoat::next()
   return frame;
 }
 
+std::shared_ptr<Frame> DataLoaderYcbineoat::nextCustom()
+{
+  assert(_id<_color_files.size());
+  const std::string data_dir = (*yml)["data_dir"].as<std::string>();
+
+  std::string color_file = _color_files[_id];
+  std::cout<<"color file: "<<color_file<<std::endl;
+  cv::Mat color = cv::imread(color_file);
+  std::string index_str;
+  {
+    std::vector<std::string> strs;
+    boost::split(strs, color_file, boost::is_any_of("/"));
+    boost::split(strs, strs.back(), boost::is_any_of("."));
+    index_str = strs[0];
+  }
+
+  cv::Mat depth_raw;
+  std::string depth_dir = data_dir+"/depth/"+index_str+".depth.png";
+  Utils::readDepthImage(depth_raw, depth_dir);
+
+  cv::Mat depth_sim;
+  depth_sim = depth_raw.clone();
+
+  cv::Mat depth;
+  depth = depth_raw.clone();
+
+  Eigen::Matrix4f pose(Eigen::Matrix4f::Identity());
+  if (_id==0)
+  {
+    pose = _ob_in_cam0.inverse();
+  }
+
+  Eigen::Vector4f roi;
+  roi << 99999,0,99999,0;
+
+  std::shared_ptr<Frame> frame(new Frame(color,depth,depth_raw,depth_sim, roi, pose, _id, index_str+".seg", _K, yml, NULL, _real_model));
+  _id++;
+
+  return frame;
+}
+
 
