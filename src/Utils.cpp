@@ -33,11 +33,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Utils.h"
-#include <vtkPolyLine.h>
-#include <vtkImageReader2Factory.h>
-#include <vtkImageReader2.h>
-#include <vtkImageData.h>
-#include <vtkImageFlip.h>
 
 
 namespace Utils

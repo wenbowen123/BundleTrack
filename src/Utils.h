@@ -77,9 +77,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <opencv2/rgbd.hpp>
 #include "opencv2/calib3d/calib3d.hpp"
 
-// For Visualization
-// #include <pcl/visualization/pcl_visualizer.h>
-// #include <pcl/visualization/cloud_viewer.h>
 
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
